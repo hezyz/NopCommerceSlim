@@ -1,0 +1,35 @@
+﻿
+@{
+    //page title
+    ViewBag.Title = T("Admin.Customers.Reports").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Customer reports");
+}
+
+@Html.AntiForgeryToken()
+
+<script>
+    $(document).ready(function() {
+        bindBootstrapTabSelectEvent('customer-reports');
+    });
+</script>
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.Customers.Reports")
+    </h1>
+    <div class="pull-right">
+        &nbsp;
+    </div>
+</div>
+
+ 
+
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @Html.Action("ReportRegisteredCustomers")
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,62 @@
+﻿@using Nop.Services.Security
+
+@{
+    Html.AppendCssFileParts("~/Administration/Content/ionicons/css/ionicons-2.0.1.min.css");
+
+    //page title
+    ViewBag.Title = T("Admin.Dashboard").Text;
+
+    var permissionService = EngineContext.Current.Resolve<IPermissionService>();
+    var canManageCustomers = permissionService.Authorize(StandardPermissionProvider.ManageCustomers);
+    var canManageProducts = permissionService.Authorize(StandardPermissionProvider.ManageProducts);
+}
+
+@Html.AntiForgeryToken()
+<div class="content-header">
+    <h1>
+        @T("Admin.Dashboard")
+    </h1>
+</div>
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Widget("admin_dashboard_top")
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.Action("NopCommerceNews", "Home")
+                    </div>
+                </div>
+            @Html.Widget("admin_dashboard_news_after")
+            @if (canManageCustomers && canManageProducts)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.Action("CommonStatistics", "Home")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_commonstatistics_after")
+            @if (canManageCustomers)
+            {
+                <div class="row">
+                        <div class="col-md-6">
+                            @Html.Action("CustomerStatistics", "Customer")
+                        </div>
+                </div>
+            }
+            
+            @Html.Widget("admin_dashboard_orderreports_after")
+            @if (canManageProducts)
+            {
+                <div class="row">
+                    <div class="col-md-4">
+                            @Html.Action("PopularSearchTermsReport", "Common")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_latestorders_searchterms_after")
+            @Html.Widget("admin_dashboard_bottom")
+        </div>
+    </div>
+</div>

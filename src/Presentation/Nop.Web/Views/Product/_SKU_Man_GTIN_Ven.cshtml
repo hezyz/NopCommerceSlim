@@ -1,0 +1,13 @@
+﻿@model ProductDetailsModel
+@using Nop.Web.Models.Catalog
+
+<div class="additional-details">
+    @*SKU*@
+    @if (!string.IsNullOrWhiteSpace(Model.Sku))
+    {
+        <div class="sku" @(string.IsNullOrWhiteSpace(Model.Sku) ? Html.Raw("style=\"display:none\"") : null)>
+            <span class="label">@T("Products.Sku"):</span>
+            <span class="value" itemprop="sku" id="sku-@Model.Id">@Model.Sku</span>
+        </div>
+    }
+</div>
