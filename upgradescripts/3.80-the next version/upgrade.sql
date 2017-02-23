@@ -5,6 +5,126 @@ declare @resources xml
 --a resource will be deleted if its value is empty
 set @resources='
 <Language>
+  <LocaleResource Name="Admin.Configuration.Plugins.OfficialFeed.Instructions">
+    <Value><![CDATA[<p>Here you can find third-party extensions and themes which are developed by our community and partners.They are also available in our <a href="http://www.nopcommerce.com/marketplace.aspx?utm_source=admin-panel&utm_medium=official-plugins&utm_campaign=admin-panel" target="_blank">marketplace</a></p>]]></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.Captcha.Instructions">
+    <Value><![CDATA[<p>A CAPTCHA is a program that can tell whether its user is a human or a computer.You''ve probably seen them — colorful images with distorted text at the bottom ofWeb registration forms. CAPTCHAs are used by many websites to prevent abuse from"bots," or automated programs usually written to generate spam. No computer programcan read distorted text as well as humans can, so bots cannot navigate sites protectedby CAPTCHAs. nopCommerce uses <a href="http://www.google.com/recaptcha" target="_blank">reCAPTCHA</a>.</p>]]></Value>
+  </LocaleResource> 
+ <LocaleResource Name="Admin.Configuration.Plugins.Description.DownloadMorePlugins">
+    <Value><![CDATA[<p>You can download more nopCommerce plugins in our <a href="http://www.nopcommerce.com/marketplace.aspx?utm_source=admin-panel&utm_medium=plugins&utm_campaign=admin-panel" target="_blank">marketplace</a></p>]]></Value>
+ </LocaleResource> 
+ <LocaleResource Name="Admin.Configuration.Settings.Blog.BlockTitle.BlogComments">
+    <Value>Blog comments</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Blog.BlockTitle.Common">
+    <Value>Common</Value>
+  </LocaleResource>
+   <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.AdditionalSections">
+    <Value>Additional sections</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.CatalogPages">
+    <Value>Catalog pages</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.Performance">
+    <Value>Performance</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.ProductFields">
+    <Value>Product fields</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.ProductPage">
+    <Value>Product page</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.ProductSorting">
+    <Value>Product sorting</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.ProductReviews">
+    <Value>Product reviews</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.Search">
+    <Value>Search</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.Share">
+    <Value>Share</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.BlockTitle.Tags">
+    <Value>Tags</Value>
+  </LocaleResource>
+   <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.Account">
+    <Value>Account</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.Common">
+    <Value>Common</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.DefaultFields">
+    <Value>Default fields</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.ExternalAuthentication">
+    <Value>External authentication</Value>
+  </LocaleResource>
+ <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.Password">
+    <Value>Password and security</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.Profile">
+    <Value>Profile</Value>
+  </LocaleResource>
+ <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.BlockTitle.TimeZone">
+    <Value>Time zone</Value>
+  </LocaleResource> 
+  <LocaleResource Name="Admin.Configuration.Settings.Forums.BlockTitle.Common">
+   <Value>Common</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Forums.BlockTitle.Feeds">
+     <Value>Feeds</Value>
+  </LocaleResource>
+   <LocaleResource Name="Admin.Configuration.Settings.Forums.BlockTitle.PageSizes">
+    <Value>Page sizes</Value>
+  </LocaleResource>
+<LocaleResource Name="Admin.Configuration.Settings.Forums.BlockTitle.Permissions">
+    <Value>Permissions</Value>
+  </LocaleResource>
+    <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.FullText">
+    <Value>Full-Text</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Captcha">
+    <Value>CAPTCHA</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Common">
+    <Value>Common</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Localization">
+    <Value>Localization</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Pdf">
+    <Value>Pdf</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Security">
+    <Value>Security</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.SEO">
+    <Value>SEO</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.Sitemap">
+    <Value>Sitemap</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.BlockTitle.SocialMedia">
+    <Value>Social media</Value>
+  </LocaleResource>
+   <LocaleResource Name="Admin.Configuration.Settings.Media.BlockTitle.Common">
+    <Value>Common</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Media.BlockTitle.OtherPages">
+    <Value>Other pages</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Media.BlockTitle.Product">
+    <Value>Product</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.News.BlockTitle.BlogComments">
+    <Value>News comments</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.News.BlockTitle.Common">
+    <Value>Common</Value>
+  </LocaleResource>
 </Language>
 '
 
