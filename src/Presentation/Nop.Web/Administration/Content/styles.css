@@ -462,25 +462,30 @@ td.k-state-focused.k-state-selected {
     border-color: #DEDEDE;
     background-color: #FFFFFF;
 }
-.form-horizontal .form-group .k-dropdown{
+.form-horizontal .form-group .k-dropdown, 
+.k-grid .k-dropdown{
     cursor: default;
     width: 100% !important;
     height: 32px;
 }
-.form-horizontal .form-group .k-dropdown .k-dropdown-wrap {
+.form-horizontal .form-group .k-dropdown .k-dropdown-wrap, 
+.k-grid .k-dropdown .k-dropdown-wrap {
     background: #fff;
     box-shadow: none;
     padding: 0 8px;
     border: 1px solid #d2d6de;
     border-radius: 0;
 }
-.form-horizontal .form-group .k-dropdown .k-dropdown-wrap .k-select{
+.form-horizontal .form-group .k-dropdown .k-dropdown-wrap .k-select, 
+.k-grid .k-dropdown .k-dropdown-wrap .k-select{
     width: 20px;
 }
-.form-horizontal .form-group .k-dropdown .k-dropdown-wrap.k-state-border-down {
+.form-horizontal .form-group .k-dropdown .k-dropdown-wrap.k-state-border-down,
+.k-grid .k-dropdown .k-dropdown-wrap.k-state-border-down  {
     border-color: #3c8dbc !important;
 }
-.form-horizontal .form-group .k-dropdown .k-dropdown-wrap .k-input {
+.form-horizontal .form-group .k-dropdown .k-dropdown-wrap .k-input,
+.k-grid .k-dropdown .k-dropdown-wrap .k-input {
     height: 32px;
     line-height: 32px;
     display: block;
@@ -800,6 +805,22 @@ td.k-state-focused.k-state-selected {
     padding: 8px 15px;
     margin-left: -20px !important;
 }
+    
+.form-group .attributes label{
+	font-weight: normal;
+}
+.form-horizontal .attributes select {
+    width: 300px !important;
+    max-width: 100%;
+    border-radius: 0;
+    border-color: #d2d6de;
+    height: 34px;
+}
+.form-group .attributes .qty-box {
+	width: 48px;
+    display: inline-block;
+}
+
 .form-horizontal .k-autocomplete, .form-horizontal .k-combobox, 
 .form-horizontal .k-numerictextbox, .form-horizontal .k-dropdown, 
 .form-horizontal .k-selectbox, .form-horizontal .k-textbox, 
@@ -813,10 +834,17 @@ td.k-state-focused.k-state-selected {
     height: 34px;
 }
 .k-grid-edit-row>td>.k-numerictextbox {
-    width: auto !important;
+    width: 100% !important;
+    min-width: 150px !important;
 }
 .k-grid .k-dropdown{
-    width: auto !important;
+    width: 100% !important;
+    min-width: 120px !important;
+    background: none;
+}
+.k-grid .k-textbox{
+    width: 100% !important;
+    min-width: 150px !important;
 }
 .tag-editor {
     border: 1px solid #d2d6de !important;
@@ -1145,6 +1173,11 @@ span.grid-report-item.red {
 .bootstrap-touchspin {
     max-width: 300px;
 }
+.bootstrap-touchspin input {
+    height: auto;
+    display: table-cell !important;
+    min-height: 34px;
+}
 .bootstrap-touchspin-postfix {
     border-left: none;
 }
@@ -1153,18 +1186,21 @@ span.grid-report-item.red {
 }
 .input-group-addon.bootstrap-touchspin-postfix {
     background-color: #eee;
+    height: 34px;
 }
 .bootstrap-touchspin .input-group-btn-vertical>.btn {
     background: #fff;
     border-color: #d2d6de;
     border-radius: 0;
+    padding: 0 10px;
+    height: 18px;
 }
 .bootstrap-touchspin .input-group-btn-vertical>.btn:hover {
     border-color: #afafaf;
 }
 .bootstrap-touchspin .input-group-btn-vertical .bootstrap-touchspin-down {
-   margin-top: 0;
-   padding-bottom: 7px; 
+   margin-top: -1px;
+   height: 17px;
 }
 
 /* THROBBER */
