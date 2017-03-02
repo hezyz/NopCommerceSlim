@@ -14,6 +14,7 @@ using Nop.Services.Catalog;
 using Nop.Services.Directory;
 using Nop.Services.ExportImport.Help;
 using Nop.Services.Localization;
+using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Security;
@@ -45,6 +46,7 @@ namespace Nop.Services.ExportImport
         private readonly IProductTagService _productTagService;
         private readonly IWorkContext _workContext;
         private readonly ILocalizationService _localizationService;
+        private readonly ICustomerActivityService _customerActivityService;
 
         #endregion
 
@@ -65,7 +67,8 @@ namespace Nop.Services.ExportImport
             CatalogSettings catalogSettings,
             IProductTagService productTagService,
             IWorkContext workContext,
-            ILocalizationService localizationService)
+            ILocalizationService localizationService,
+            ICustomerActivityService customerActivityService)
         {
             this._productService = productService;
             this._categoryService = categoryService;
@@ -83,6 +86,7 @@ namespace Nop.Services.ExportImport
             this._productTagService = productTagService;
             this._workContext = workContext;
             this._localizationService = localizationService;
+            this._customerActivityService = customerActivityService;
         }
 
         #endregion
@@ -280,7 +284,272 @@ namespace Nop.Services.ExportImport
 
         #region Methods
 
-        
+        /// <summary>
+        /// Import products from XLSX file
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        public virtual void ImportProductsFromXlsx(Stream stream)
+        {
+            using (var xlPackage = new ExcelPackage(stream))
+            {
+                // get the first worksheet in the workbook
+                var worksheet = xlPackage.Workbook.Worksheets.FirstOrDefault();
+                if (worksheet == null)
+                    throw new NopException("No worksheet found");
+
+                //the columns
+                var properties = GetPropertiesByExcelCells<Product>(worksheet);
+
+                var manager = new PropertyManager<Product>(properties);
+
+                var endRow = 2;
+                var allCategoriesNames = new List<string>();
+                var allSku = new List<string>();
+
+                var tempProperty = manager.GetProperty("Categories");
+                var categoryCellNum = tempProperty.Return(p => p.PropertyOrderPosition, -1);
+
+                tempProperty = manager.GetProperty("SKU");
+                var skuCellNum = tempProperty.Return(p => p.PropertyOrderPosition, -1);
+
+                var allManufacturersNames = new List<string>();
+                tempProperty = manager.GetProperty("Manufacturers");
+                var manufacturerCellNum = tempProperty.Return(p => p.PropertyOrderPosition, -1);
+
+                manager.SetSelectList("ProductType", ProductType.SimpleProduct.ToSelectList(useLocalization: false));
+
+                var countProductsInFile = 0;
+
+                //find end of data
+                while (true)
+                {
+                    var allColumnsAreEmpty = manager.GetProperties
+                        .Select(property => worksheet.Cells[endRow, property.PropertyOrderPosition])
+                        .All(cell => cell == null || cell.Value == null || String.IsNullOrEmpty(cell.Value.ToString()));
+
+                    if (allColumnsAreEmpty)
+                        break;
+
+                    if (categoryCellNum > 0)
+                    {
+                        var categoryIds = worksheet.Cells[endRow, categoryCellNum].Value.Return(p => p.ToString(), string.Empty);
+
+                        if (!categoryIds.IsEmpty())
+                            allCategoriesNames.AddRange(categoryIds.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()));
+                    }
+
+                    if (skuCellNum > 0)
+                    {
+                        var sku = worksheet.Cells[endRow, skuCellNum].Value.Return(p => p.ToString(), string.Empty);
+
+                        if (!sku.IsEmpty())
+                            allSku.Add(sku);
+                    }
+
+                    if (manufacturerCellNum > 0)
+                    {
+                        var manufacturerIds = worksheet.Cells[endRow, manufacturerCellNum].Value.Return(p => p.ToString(), string.Empty);
+                        if (!manufacturerIds.IsEmpty())
+                            allManufacturersNames.AddRange(manufacturerIds.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()));
+                    }
+
+                    //counting the number of products
+                    countProductsInFile += 1;
+
+                    endRow++;
+                }
+
+                //performance optimization, the check for the existence of the categories in one SQL request
+                var notExistingCategories = _categoryService.GetNotExistingCategories(allCategoriesNames.ToArray());
+                if (notExistingCategories.Any())
+                {
+                    throw new ArgumentException(string.Format("The following category name(s) don't exist - {0}", string.Join(", ", notExistingCategories)));
+                }
+
+                //performance optimization, load all products by SKU in one SQL request
+                var allProductsBySku = _productService.GetProductsBySku(allSku.ToArray());
+
+                //performance optimization, load all categories IDs for products in one SQL request
+                var allProductsCategoryIds = _categoryService.GetProductCategoryIds(allProductsBySku.Select(p => p.Id).ToArray());
+
+                //performance optimization, load all categories in one SQL request
+                var allCategories = _categoryService.GetAllCategories(showHidden: true);
+
+                //product to import images
+                var productPictureMetadata = new List<ProductPictureMetadata>();
+
+                Product lastLoadedProduct = null;
+
+                for (var iRow = 2; iRow < endRow; iRow++)
+                {
+                    manager.ReadFromXlsx(worksheet, iRow);
+
+                    var product = skuCellNum > 0 ? allProductsBySku.FirstOrDefault(p => p.Sku == manager.GetProperty("SKU").StringValue) : null;
+
+                    var isNew = product == null;
+
+                    product = product ?? new Product();
+
+                    if (isNew)
+                        product.CreatedOnUtc = DateTime.UtcNow;
+
+                    foreach (var property in manager.GetProperties)
+                    {
+                        switch (property.PropertyName)
+                        {
+                            case "ProductType":
+                                product.ProductTypeId = property.IntValue;
+                                break;
+                            case "ParentGroupedProductId":
+                                product.ParentGroupedProductId = property.IntValue;
+                                break;
+                            case "VisibleIndividually":
+                                product.VisibleIndividually = property.BooleanValue;
+                                break;
+                            case "Name":
+                                product.Name = property.StringValue;
+                                break;
+                            case "ShortDescription":
+                                product.ShortDescription = property.StringValue;
+                                break;
+                            case "FullDescription":
+                                product.FullDescription = property.StringValue;
+                                break;
+                            case "ProductTemplate":
+                                product.ProductTemplateId = property.IntValue;
+                                break;
+                            case "ShowOnHomePage":
+                                product.ShowOnHomePage = property.BooleanValue;
+                                break;
+                            case "MetaKeywords":
+                                product.MetaKeywords = property.StringValue;
+                                break;
+                            case "MetaDescription":
+                                product.MetaDescription = property.StringValue;
+                                break;
+                            case "MetaTitle":
+                                product.MetaTitle = property.StringValue;
+                                break;
+                            case "AllowCustomerReviews":
+                                product.AllowCustomerReviews = property.BooleanValue;
+                                break;
+                            case "Published":
+                                product.Published = property.BooleanValue;
+                                break;
+                            case "SKU":
+                                product.Sku = property.StringValue;
+                                break;
+                            case "MarkAsNew":
+                                product.MarkAsNew = property.BooleanValue;
+                                break;
+                            case "MarkAsNewStartDateTimeUtc":
+                                product.MarkAsNewStartDateTimeUtc = property.DateTimeNullable;
+                                break;
+                            case "MarkAsNewEndDateTimeUtc":
+                                product.MarkAsNewEndDateTimeUtc = property.DateTimeNullable;
+                                break;
+                        }
+                    }
+
+                    //set some default default values if not specified
+                    if (isNew && properties.All(p => p.PropertyName != "ProductType"))
+                        product.ProductType = ProductType.SimpleProduct;
+                    if (isNew && properties.All(p => p.PropertyName != "VisibleIndividually"))
+                        product.VisibleIndividually = true;
+                    if (isNew && properties.All(p => p.PropertyName != "Published"))
+                        product.Published = true;
+
+                    product.UpdatedOnUtc = DateTime.UtcNow;
+
+                    if (isNew)
+                    {
+                        _productService.InsertProduct(product);
+                    }
+                    else
+                    {
+                        _productService.UpdateProduct(product);
+                    }
+
+                    tempProperty = manager.GetProperty("SeName");
+                    if (tempProperty != null)
+                    {
+                        var seName = tempProperty.StringValue;
+                        //search engine name
+                        _urlRecordService.SaveSlug(product, product.ValidateSeName(seName, product.Name, true), 0);
+                    }
+
+                    tempProperty = manager.GetProperty("Categories");
+
+                    if (tempProperty != null)
+                    {
+                        var categoryNames = tempProperty.StringValue;
+
+                        //category mappings
+                        var categories = isNew || !allProductsCategoryIds.ContainsKey(product.Id) ? new int[0] : allProductsCategoryIds[product.Id];
+                        var importedCategories = categoryNames.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(x => allCategories.First(c => c.Name == x.Trim()).Id).ToList();
+                        foreach (var categoryId in importedCategories)
+                        {
+                            if (categories.Any(c => c == categoryId))
+                                continue;
+
+                            var productCategory = new ProductCategory
+                            {
+                                ProductId = product.Id,
+                                CategoryId = categoryId,
+                                IsFeaturedProduct = false,
+                                DisplayOrder = 1
+                            };
+                            _categoryService.InsertProductCategory(productCategory);
+                        }
+
+                        //delete product categories
+                        var deletedProductCategories = categories.Where(categoryId => !importedCategories.Contains(categoryId))
+                                .Select(categoryId => product.ProductCategories.First(pc => pc.CategoryId == categoryId));
+                        foreach (var deletedProductCategory in deletedProductCategories)
+                        {
+                            _categoryService.DeleteProductCategory(deletedProductCategory);
+                        }
+                    }
+
+                    tempProperty = manager.GetProperty("ProductTags");
+                    if (tempProperty != null)
+                    {
+                        var productTags = tempProperty.StringValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+
+                        //product tag mappings
+                        _productTagService.UpdateProductTags(product, productTags);
+                    }
+
+                    var picture1 = manager.GetProperty("Picture1").Return(p => p.StringValue, String.Empty);
+                    var picture2 = manager.GetProperty("Picture2").Return(p => p.StringValue, String.Empty);
+                    var picture3 = manager.GetProperty("Picture3").Return(p => p.StringValue, String.Empty);
+
+                    productPictureMetadata.Add(new ProductPictureMetadata
+                    {
+                        ProductItem = product,
+                        Picture1Path = picture1,
+                        Picture2Path = picture2,
+                        Picture3Path = picture3,
+                        IsNew = isNew
+                    });
+
+                    lastLoadedProduct = product;
+
+                    //update "HasTierPrices" and "HasDiscountsApplied" properties
+                    //_productService.UpdateHasTierPricesProperty(product);
+                    //_productService.UpdateHasDiscountsApplied(product);
+                }
+
+                if (_mediaSettings.ImportProductImagesUsingHash && _pictureService.StoreInDb && _dataProvider.SupportedLengthOfBinaryHash() > 0)
+                    ImportProductImagesUsingHash(productPictureMetadata, allProductsBySku);
+                else
+                    ImportProductImagesUsingServices(productPictureMetadata);
+
+                //activity log
+                _customerActivityService.InsertActivity("ImportProducts", _localizationService.GetResource("ActivityLog.ImportProducts"), countProductsInFile);
+            }
+        }
+
         /// <summary>
         /// Import newsletter subscribers from TXT file
         /// </summary>
@@ -411,9 +680,11 @@ namespace Nop.Services.ExportImport
                 }
             }
 
+            //activity log
+            _customerActivityService.InsertActivity("ImportStates", _localizationService.GetResource("ActivityLog.ImportStates"), count);
+
             return count;
         }
-
 
         /// <summary>
         /// Import categories from XLSX file
@@ -536,6 +807,9 @@ namespace Nop.Services.ExportImport
 
                     iRow++;
                 }
+
+                //activity log
+                _customerActivityService.InsertActivity("ImportCategories", _localizationService.GetResource("ActivityLog.ImportCategories"), iRow - 2);
             }
         }
 

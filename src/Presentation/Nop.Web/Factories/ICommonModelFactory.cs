@@ -21,7 +21,7 @@ namespace Nop.Web.Factories
 
         SitemapModel PrepareSitemapModel();
 
-        string PrepareSitemapXml(UrlHelper url);
+        string PrepareSitemapXml(UrlHelper url, int? id);
 
         StoreThemeSelectorModel PrepareStoreThemeSelectorModel();
 

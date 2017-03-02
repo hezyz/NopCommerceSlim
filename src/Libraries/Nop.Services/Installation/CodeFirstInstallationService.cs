@@ -4408,7 +4408,8 @@ namespace Nop.Services.Installation
                 PopupGridPageSize = 10,
                 GridPageSizes = "10, 15, 20, 50, 100",
                 RichEditorAdditionalSettings = null,
-                RichEditorAllowJavaScript = false
+                RichEditorAllowJavaScript = false,
+                UseIsoDateTimeConverterInJson = true
             });
 
 
@@ -6601,6 +6602,24 @@ namespace Nop.Services.Installation
                     SystemKeyword = "Impersonation.Finished",
                     Enabled = true,
                     Name = "Customer impersonation session. Finished"
+                },
+                new ActivityLogType
+                  {
+                    SystemKeyword = "ImportCategories",
+                    Enabled = true,
+                    Name = "Categories were imported"
+                },
+                new ActivityLogType
+                {
+                    SystemKeyword = "ImportProducts",
+                    Enabled = true,
+                    Name = "Products were imported"
+                },
+                new ActivityLogType
+                {
+                    SystemKeyword = "ImportStates",
+                    Enabled = true,
+                    Name = "States were imported"
                 },
                 new ActivityLogType
                 {

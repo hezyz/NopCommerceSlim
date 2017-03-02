@@ -1,9 +1,12 @@
 ﻿using System.Text;
 using System.Web.Mvc;
+using Newtonsoft.Json.Converters;
 using Nop.Core;
+using Nop.Core.Domain.Common;
 using Nop.Core.Infrastructure;
 using Nop.Services.Localization;
 using Nop.Web.Framework.Controllers;
+using Nop.Web.Framework.Mvc;
 using Nop.Web.Framework.Security;
 
 namespace Nop.Admin.Controllers
@@ -36,7 +39,7 @@ namespace Nop.Admin.Controllers
                 LogException(filterContext.Exception);
             base.OnException(filterContext);
         }
-        
+
         /// <summary>
         /// Access denied view
         /// </summary>
@@ -54,7 +57,7 @@ namespace Nop.Admin.Controllers
         protected JsonResult AccessDeniedKendoGridJson()
         {
             var localizationService = EngineContext.Current.Resolve<ILocalizationService>();
-            
+
             return ErrorForKendoGridJson(localizationService.GetResource("Admin.AccessDenied.Description"));
         }
 
@@ -71,7 +74,7 @@ namespace Nop.Admin.Controllers
             {
                 tabName = this.Request.Form["selected-tab-name"];
             }
-            
+
             if (!string.IsNullOrEmpty(tabName))
             {
                 const string dataKey = "nop.selected-tab-name";
@@ -99,18 +102,23 @@ namespace Nop.Admin.Controllers
         /// <param name="behavior">The JSON request behavior</param>
         protected override JsonResult Json(object data, string contentType, Encoding contentEncoding, JsonRequestBehavior behavior)
         {
+            //Json fix issue with dates in KendoUI grid
+            //use json with IsoDateTimeConverter
+            var result = EngineContext.Current.Resolve<AdminAreaSettings>().UseIsoDateTimeConverterInJson
+                ? new ConverterJsonResult(new IsoDateTimeConverter()) : new JsonResult();
+
+            result.Data = data;
+            result.ContentType = contentType;
+            result.ContentEncoding = contentEncoding;
+            result.JsonRequestBehavior = behavior;
+
             //Json fix for admin area
             //sometime our entities have big text values returned (e.g. product desriptions)
             //of course, we can set and return them as "empty" (we already do it so). Furthermore, it's a perfoemance optimization
             //but it's better to avoid exceptions for other entities and allow maximum JSON length
-            return new JsonResult()
-            {
-                Data = data,
-                ContentType = contentType,
-                ContentEncoding = contentEncoding,
-                JsonRequestBehavior = behavior,
-                MaxJsonLength = int.MaxValue
-            };
+            result.MaxJsonLength = int.MaxValue;
+
+            return result;
             //return base.Json(data, contentType, contentEncoding, behavior);
         }
 

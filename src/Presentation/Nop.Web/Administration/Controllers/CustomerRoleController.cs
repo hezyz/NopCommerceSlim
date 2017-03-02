@@ -100,11 +100,8 @@ namespace Nop.Admin.Controllers
                 Data = customerRoles.Select(PrepareCustomerRoleModel),
                 Total = customerRoles.Count()
 			};
-			return new JsonResult
-			{
-				Data = gridModel
-			};
-		}
+            return Json(gridModel);
+        }
 
         public virtual ActionResult Create()
         {
