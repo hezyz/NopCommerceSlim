@@ -134,6 +134,21 @@ set @resources='
   <LocaleResource Name="ActivityLog.ImportStates">
     <Value>{0} states and provinces were imported</Value>
   </LocaleResource>
+   <LocaleResource Name="Admin.ContentManagement.Topics.Fields.SystemName.Required">
+    <Value></Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.List.SearchStore">
+    <Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.List.SearchStore.Hint">
+    <Value>Search by a specific store.</Value>
+  </LocaleResource>
+   <LocaleResource Name="Admin.Configuration.Settings.Media.DefaultPictureZoomEnabled">
+    <Value>Picture zoom</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Media.DefaultPictureZoomEnabled.Hint">
+   <Value>Check to enable picture zooming.</Value>
+  </LocaleResource>
 </Language>
 '
 
