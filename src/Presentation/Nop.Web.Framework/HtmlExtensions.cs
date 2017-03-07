@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -50,7 +51,7 @@ namespace Nop.Web.Framework
                     //default tab
                     tabStrip.AppendLine("<li class=\"active\">");
                     tabStrip.AppendLine(string.Format("<a data-tab-name=\"{0}-{1}-tab\" href=\"#{0}-{1}-tab\" data-toggle=\"tab\">{2}</a>",
-                            name, 
+                            name,
                             "standard",
                             EngineContext.Current.Resolve<ILocalizationService>().GetResource("Admin.Common.Standard")));
                     tabStrip.AppendLine("</li>");
@@ -67,7 +68,7 @@ namespace Nop.Web.Framework
                         var urlHelper = new UrlHelper(helper.ViewContext.RequestContext);
                         var iconUrl = urlHelper.Content("~/Content/images/flags/" + language.FlagImageFileName);
                         tabStrip.AppendLine(string.Format("<a data-tab-name=\"{0}-{1}-tab\" href=\"#{0}-{1}-tab\" data-toggle=\"tab\"><img alt='' src='{2}'>{3}</a>",
-                                name, 
+                                name,
                                 language.Id,
                                 iconUrl,
                                 HttpUtility.HtmlEncode(language.Name)));
@@ -75,7 +76,7 @@ namespace Nop.Web.Framework
                         tabStrip.AppendLine("</li>");
                     }
                     tabStrip.AppendLine("</ul>");
-                    
+
                     //default tab
                     tabStrip.AppendLine("<div class=\"tab-content\">");
                     tabStrip.AppendLine(string.Format("<div class=\"tab-pane active\" id=\"{0}-{1}-tab\">", name, "standard"));
@@ -244,7 +245,7 @@ namespace Nop.Web.Framework
             }
             return MvcHtmlString.Create(result.ToString());
         }
-        
+
         /// <summary>
         /// Render CSS styles of selected index 
         /// </summary>
@@ -387,7 +388,7 @@ namespace Nop.Web.Framework
                 {
                     var langId = EngineContext.Current.Resolve<IWorkContext>().WorkingLanguage.Id;
                     hintResource = EngineContext.Current.Resolve<ILocalizationService>()
-                        .GetResource(resourceDisplayName.ResourceKey + ".Hint",  langId, returnEmptyIfNotFound: true, logIfNotFound: false);
+                        .GetResource(resourceDisplayName.ResourceKey + ".Hint", langId, returnEmptyIfNotFound: true, logIfNotFound: false);
                     if (!String.IsNullOrEmpty(hintResource))
                     {
                         result.Append(helper.Hint(hintResource).ToHtmlString());
@@ -403,7 +404,8 @@ namespace Nop.Web.Framework
         }
 
         public static MvcHtmlString NopEditorFor<TModel, TValue>(this HtmlHelper<TModel> helper,
-            Expression<Func<TModel, TValue>> expression, string postfix = "", bool? renderFormControlClass = null)
+            Expression<Func<TModel, TValue>> expression, string postfix = "",
+            bool? renderFormControlClass = null, bool required = false)
         {
             var result = new StringBuilder();
 
@@ -413,13 +415,19 @@ namespace Nop.Web.Framework
                 (renderFormControlClass.HasValue && renderFormControlClass.Value))
                 htmlAttributes = new { @class = "form-control" };
 
-            result.Append(helper.EditorFor(expression, new { htmlAttributes, postfix }));
+            if (required)
+                result.AppendFormat(
+                    "<div class=\"input-group input-group-required\">{0}<div class=\"input-group-btn\"><span class=\"required\">*</span></div></div>",
+                    helper.EditorFor(expression, new { htmlAttributes, postfix }));
+            else
+                result.Append(helper.EditorFor(expression, new { htmlAttributes, postfix }));
 
             return MvcHtmlString.Create(result.ToString());
         }
 
         public static MvcHtmlString NopDropDownList<TModel>(this HtmlHelper<TModel> helper, string name,
-            IEnumerable<SelectListItem> itemList, object htmlAttributes = null, bool renderFormControlClass = true)
+            IEnumerable<SelectListItem> itemList, object htmlAttributes = null,
+            bool renderFormControlClass = true, bool required = false)
         {
             var result = new StringBuilder();
 
@@ -427,14 +435,19 @@ namespace Nop.Web.Framework
             if (renderFormControlClass)
                 attrs = AddFormControlClassToHtmlAttributes(attrs);
 
-            result.Append(helper.DropDownList(name, itemList, attrs));
+            if (required)
+                result.AppendFormat(
+                    "<div class=\"input-group input-group-required\">{0}<div class=\"input-group-btn\"><span class=\"required\">*</span></div></div>",
+                    helper.DropDownList(name, itemList, attrs));
+            else
+                result.Append(helper.DropDownList(name, itemList, attrs));
 
             return MvcHtmlString.Create(result.ToString());
         }
 
         public static MvcHtmlString NopDropDownListFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression, IEnumerable<SelectListItem> itemList,
-            object htmlAttributes = null, bool renderFormControlClass = true)
+            object htmlAttributes = null, bool renderFormControlClass = true, bool required = false)
         {
             var result = new StringBuilder();
 
@@ -442,14 +455,19 @@ namespace Nop.Web.Framework
             if (renderFormControlClass)
                 attrs = AddFormControlClassToHtmlAttributes(attrs);
 
-            result.Append(helper.DropDownListFor(expression, itemList, attrs));
+            if (required)
+                result.AppendFormat(
+                    "<div class=\"input-group input-group-required\">{0}<div class=\"input-group-btn\"><span class=\"required\">*</span></div></div>",
+                    helper.DropDownListFor(expression, itemList, attrs));
+            else
+                result.Append(helper.DropDownListFor(expression, itemList, attrs));
 
             return MvcHtmlString.Create(result.ToString());
         }
 
         public static MvcHtmlString NopTextAreaFor<TModel, TValue>(this HtmlHelper<TModel> helper,
             Expression<Func<TModel, TValue>> expression, object htmlAttributes = null,
-            bool renderFormControlClass = true, int rows = 4, int columns = 20)
+            bool renderFormControlClass = true, int rows = 4, int columns = 20, bool required = false)
         {
             var result = new StringBuilder();
 
@@ -457,7 +475,12 @@ namespace Nop.Web.Framework
             if (renderFormControlClass)
                 attrs = AddFormControlClassToHtmlAttributes(attrs);
 
-            result.Append(helper.TextAreaFor(expression, rows, columns, attrs));
+            if (required)
+                result.AppendFormat(
+                    "<div class=\"input-group input-group-required\">{0}<div class=\"input-group-btn\"><span class=\"required\">*</span></div></div>",
+                    helper.TextAreaFor(expression, rows, columns, attrs));
+            else
+                result.Append(helper.TextAreaFor(expression, rows, columns, attrs));
 
             return MvcHtmlString.Create(result.ToString());
         }
@@ -618,7 +641,7 @@ namespace Nop.Web.Framework
             monthsList.InnerHtml = months.ToString();
             yearsList.InnerHtml = years.ToString();
 
-            if (wrapTags) 
+            if (wrapTags)
             {
                 string wrapDaysList = "<span class=\"days-list select-wrapper\">" + daysList + "</span>";
                 string wrapMonthsList = "<span class=\"months-list select-wrapper\">" + monthsList + "</span>";

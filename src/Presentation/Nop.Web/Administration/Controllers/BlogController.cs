@@ -22,8 +22,8 @@ using Nop.Web.Framework.Mvc;
 namespace Nop.Admin.Controllers
 {
     public partial class BlogController : BaseAdminController
-	{
-		#region Fields
+    {
+        #region Fields
 
         private readonly IBlogService _blogService;
         private readonly ILanguageService _languageService;
@@ -131,29 +131,36 @@ namespace Nop.Admin.Controllers
         }
 
         #endregion
-        
-		#region Blog posts
+
+        #region Blog posts
 
         public virtual ActionResult Index()
         {
             return RedirectToAction("List");
         }
 
-		public virtual ActionResult List()
+        public virtual ActionResult List()
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedView();
 
-			return View();
-		}
+            var model = new BlogPostListModel();
 
-		[HttpPost]
-        public virtual ActionResult List(DataSourceRequest command)
+            //stores
+            model.AvailableStores.Add(new SelectListItem { Text = _localizationService.GetResource("Admin.Common.All"), Value = "0" });
+            foreach (var store in _storeService.GetAllStores())
+                model.AvailableStores.Add(new SelectListItem { Text = store.Name, Value = store.Id.ToString() });
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public virtual ActionResult List(DataSourceRequest command, BlogPostListModel model)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedKendoGridJson();
 
-            var blogPosts = _blogService.GetAllBlogPosts(0, 0, null, null, command.Page - 1, command.PageSize, true);
+            var blogPosts = _blogService.GetAllBlogPosts(model.SearchStoreId, 0, null, null, command.Page - 1, command.PageSize, true);
             var gridModel = new DataSourceResult
             {
                 Data = blogPosts.Select(x =>
@@ -174,14 +181,15 @@ namespace Nop.Admin.Controllers
                 }),
                 Total = blogPosts.TotalCount
             };
+
             return Json(gridModel);
         }
-        
+
         public virtual ActionResult Create()
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedView();
-            
+
             var model = new BlogPostModel();
             //languages
             PrepareLanguagesModel(model);
@@ -234,7 +242,7 @@ namespace Nop.Admin.Controllers
             return View(model);
         }
 
-		public virtual ActionResult Edit(int id)
+        public virtual ActionResult Edit(int id)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedView();
@@ -252,10 +260,10 @@ namespace Nop.Admin.Controllers
             //Store
             PrepareStoresMappingModel(model, blogPost, false);
             return View(model);
-		}
+        }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-		public virtual ActionResult Edit(BlogPostModel model, bool continueEditing)
+        public virtual ActionResult Edit(BlogPostModel model, bool continueEditing)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedView();
@@ -288,7 +296,7 @@ namespace Nop.Admin.Controllers
                     //selected tab
                     SaveSelectedTabName();
 
-                    return RedirectToAction("Edit", new {id = blogPost.Id});
+                    return RedirectToAction("Edit", new { id = blogPost.Id });
                 }
                 return RedirectToAction("List");
             }
@@ -297,10 +305,10 @@ namespace Nop.Admin.Controllers
             PrepareStoresMappingModel(model, blogPost, true);
             PrepareLanguagesModel(model);
             return View(model);
-		}
+        }
 
-		[HttpPost]
-		public virtual ActionResult Delete(int id)
+        [HttpPost]
+        public virtual ActionResult Delete(int id)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageBlog))
                 return AccessDeniedView();
@@ -316,10 +324,10 @@ namespace Nop.Admin.Controllers
             _customerActivityService.InsertActivity("DeleteBlogPost", _localizationService.GetResource("ActivityLog.DeleteBlogPost"), blogPost.Id);
 
             SuccessNotification(_localizationService.GetResource("Admin.ContentManagement.Blog.BlogPosts.Deleted"));
-			return RedirectToAction("List");
-		}
+            return RedirectToAction("List");
+        }
 
-		#endregion
+        #endregion
 
         #region Comments
 

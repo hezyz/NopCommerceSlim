@@ -4080,6 +4080,12 @@
   <LocaleResource Name="Admin.Configuration.Settings.Media.DefaultImageQuality.Hint">
     <Value>The image quality to be used for uploaded images. Once changed you have to manually delete already generated thumbs.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Media.DefaultPictureZoomEnabled">
+    <Value>Picture zoom</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Media.DefaultPictureZoomEnabled.Hint">
+    <Value>Check to enable picture zooming.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.Media.ImportProductImagesUsingHash">
     <Value>Import product images using hash</Value>
   </LocaleResource>
@@ -4562,6 +4568,12 @@
   </LocaleResource>
   <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.Info">
     <Value>Info</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.List.SearchStore">
+    <Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.List.SearchStore.Hint">
+    <Value>Search by a specific store.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.ContentManagement.Blog.BlogPosts.Updated">
     <Value>The blog post has been updated successfully.</Value>
@@ -5291,9 +5303,6 @@
   </LocaleResource>
   <LocaleResource Name="Admin.ContentManagement.Topics.Fields.SystemName.Hint">
     <Value>System name of this topic.</Value>
-  </LocaleResource>
-  <LocaleResource Name="Admin.ContentManagement.Topics.Fields.SystemName.Required">
-    <Value>Enter system name.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.ContentManagement.Topics.Fields.Title">
     <Value>Title</Value>
