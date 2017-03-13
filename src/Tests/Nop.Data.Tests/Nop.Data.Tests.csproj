@@ -76,6 +76,7 @@
     <Compile Include="Customers\CustomerAttributePersistenceTests.cs" />
     <Compile Include="Customers\CustomerAttributeValuePersistenceTests.cs" />
     <Compile Include="Customers\CustomerPasswordPersistenceTests.cs" />
+    <Compile Include="TestHelper.cs" />
     <Compile Include="Topics\TopicTemplatePersistenceTests.cs" />
     <Compile Include="Stores\StoreMappingPersistenceTests.cs" />
     <Compile Include="Stores\StorePersistenceTests.cs" />
