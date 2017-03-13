@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Linq;
+using System.Web.Mvc;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Plugin.Widgets.NivoSlider.Infrastructure.Cache;
@@ -23,7 +24,7 @@ namespace Nop.Plugin.Widgets.NivoSlider.Controllers
 
         public WidgetsNivoSliderController(IWorkContext workContext,
             IStoreContext storeContext,
-            IStoreService storeService, 
+            IStoreService storeService,
             IPictureService pictureService,
             ISettingService settingService,
             ICacheManager cacheManager,
@@ -106,6 +107,17 @@ namespace Nop.Plugin.Widgets.NivoSlider.Controllers
             //load settings for a chosen store scope
             var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
             var nivoSliderSettings = _settingService.LoadSetting<NivoSliderSettings>(storeScope);
+
+            //get previous picture identifiers
+            var previousPictureIds = new[]
+            {
+                nivoSliderSettings.Picture1Id,
+                nivoSliderSettings.Picture2Id,
+                nivoSliderSettings.Picture3Id,
+                nivoSliderSettings.Picture4Id,
+                nivoSliderSettings.Picture5Id
+            };
+
             nivoSliderSettings.Picture1Id = model.Picture1Id;
             nivoSliderSettings.Text1 = model.Text1;
             nivoSliderSettings.Link1 = model.Link1;
@@ -140,9 +152,27 @@ namespace Nop.Plugin.Widgets.NivoSlider.Controllers
             _settingService.SaveSettingOverridablePerStore(nivoSliderSettings, x => x.Picture5Id, model.Picture5Id_OverrideForStore, storeScope, false);
             _settingService.SaveSettingOverridablePerStore(nivoSliderSettings, x => x.Text5, model.Text5_OverrideForStore, storeScope, false);
             _settingService.SaveSettingOverridablePerStore(nivoSliderSettings, x => x.Link5, model.Link5_OverrideForStore, storeScope, false);
-            
+
             //now clear settings cache
             _settingService.ClearCache();
+
+            //get current picture identifiers
+            var currentPictureIds = new[]
+            {
+                nivoSliderSettings.Picture1Id,
+                nivoSliderSettings.Picture2Id,
+                nivoSliderSettings.Picture3Id,
+                nivoSliderSettings.Picture4Id,
+                nivoSliderSettings.Picture5Id
+            };
+
+            //delete an old picture (if deleted or updated)
+            foreach (var pictureId in previousPictureIds.Except(currentPictureIds))
+            {
+                var previousPicture = _pictureService.GetPictureById(pictureId);
+                if (previousPicture != null)
+                    _pictureService.DeletePicture(previousPicture);
+            }
 
             SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
             return Configure();

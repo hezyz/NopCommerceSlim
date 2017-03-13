@@ -188,6 +188,7 @@
     <Compile Include="Catalog\IRecentlyViewedProductsService.cs" />
     <Compile Include="Catalog\RecentlyViewedProductsService.cs" />
     <Compile Include="Catalog\ProductExtensions.cs" />
+    <Compile Include="Catalog\RoundingHelper.cs" />
     <Compile Include="Customers\Cache\CustomerCacheEventConsumer.cs" />
     <Compile Include="Customers\CustomerAttributeFormatter.cs" />
     <Compile Include="Customers\ICustomerAttributeFormatter.cs" />

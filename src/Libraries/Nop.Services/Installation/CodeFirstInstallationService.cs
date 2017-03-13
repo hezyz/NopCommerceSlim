@@ -4305,7 +4305,7 @@ namespace Nop.Services.Installation
 
         }
 
-        protected virtual void InstallSettings()
+        protected virtual void InstallSettings(bool installSampleData)
         {
             var settingService = EngineContext.Current.Resolve<ISettingService>();
             settingService.SaveSetting(new PdfSettings
@@ -4322,6 +4322,7 @@ namespace Nop.Services.Installation
             {
                 UseSystemEmailForContactUsForm = true,
                 UseStoredProceduresIfSupported = true,
+                UseStoredProcedureForLoadingCategories = false,
                 SitemapEnabled = true,
                 SitemapIncludeCategories = true,
                 SitemapIncludeProducts = false,
@@ -4408,6 +4409,7 @@ namespace Nop.Services.Installation
                 PopupGridPageSize = 10,
                 GridPageSizes = "10, 15, 20, 50, 100",
                 RichEditorAdditionalSettings = null,
+                UseRichEditorInMessageTemplates = false,
                 RichEditorAllowJavaScript = false,
                 UseIsoDateTimeConverterInJson = true
             });
@@ -4556,7 +4558,8 @@ namespace Nop.Services.Installation
                 DefaultPictureZoomEnabled = false,
                 DefaultImageQuality = 80,
                 MultipleThumbDirectories = false,
-                ImportProductImagesUsingHash = true
+                ImportProductImagesUsingHash = true,
+                AzureCacheControlHeader = string.Empty
             });
 
             settingService.SaveSetting(new StoreInformationSettings
@@ -4565,6 +4568,7 @@ namespace Nop.Services.Installation
                 DefaultStoreTheme = "DefaultClean",
                 AllowCustomerToSelectTheme = false,
                 DisplayMiniProfilerInPublicStore = false,
+                DisplayMiniProfilerForAdminOnly = false,
                 DisplayEuCookieLawWarning = false,
                 FacebookLink = "http://www.facebook.com/nopCommerce",
                 TwitterLink = "https://twitter.com/nopCommerce",
@@ -4676,6 +4680,17 @@ namespace Nop.Services.Installation
             settingService.SaveSetting(new WidgetSettings
             {
                 ActiveWidgetSystemNames = new List<string> { "Widgets.NivoSlider" },
+            });
+
+            settingService.SaveSetting(new DisplayDefaultMenuItemSettings
+            {
+                DisplayHomePageMenuItem = !installSampleData,
+                DisplayNewProductsMenuItem = !installSampleData,
+                DisplayProductSearchMenuItem = !installSampleData,
+                DisplayCustomerInfoMenuItem = !installSampleData,
+                DisplayBlogMenuItem = !installSampleData,
+                DisplayForumsMenuItem = !installSampleData,
+                DisplayContactUsMenuItem = !installSampleData
             });
         }
 
@@ -6855,7 +6870,7 @@ namespace Nop.Services.Installation
             InstallCustomersAndUsers(defaultUserEmail, defaultUserPassword);
             InstallEmailAccounts();
             InstallMessageTemplates();
-            InstallSettings();
+            InstallSettings(installSampleData);
             InstallTopicTemplates();
             InstallTopics();
             InstallLocaleResources();
